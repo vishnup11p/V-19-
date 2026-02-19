@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Play, Plus, Info, Star } from 'lucide-react';
+import { Play, Plus, Info, Star, ChevronRight } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,170 +8,120 @@ const MovieCard = ({ movie, index = 0 }) => {
     const navigate = useNavigate();
     const cardRef = useRef(null);
 
-    // 3D tilt effect
+    // Dynamic 3D Tilt
     const x = useMotionValue(0);
     const y = useMotionValue(0);
-
-    const mouseXSpring = useSpring(x);
-    const mouseYSpring = useSpring(y);
-
-    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7.5deg", "-7.5deg"]);
-    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7.5deg", "7.5deg"]);
+    const mouseXSpring = useSpring(x, { stiffness: 150, damping: 20 });
+    const mouseYSpring = useSpring(y, { stiffness: 150, damping: 20 });
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
 
     const handleMouseMove = (e) => {
         if (!cardRef.current) return;
-
         const rect = cardRef.current.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        const xPct = mouseX / width - 0.5;
-        const yPct = mouseY / height - 0.5;
-
-        x.set(xPct);
-        y.set(yPct);
-    };
-
-    const handleMouseLeave = () => {
-        setIsHovered(false);
-        x.set(0);
-        y.set(0);
+        x.set((e.clientX - rect.left) / rect.width - 0.5);
+        y.set((e.clientY - rect.top) / rect.height - 0.5);
     };
 
     return (
         <motion.div
             ref={cardRef}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="relative group perspective-1000"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.03, duration: 0.5 }}
+            className="relative group perspective-[1500px]"
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={handleMouseLeave}
+            onMouseLeave={() => { setIsHovered(false); x.set(0); y.set(0); }}
         >
             <motion.div
-                style={{
-                    rotateX,
-                    rotateY,
-                    transformStyle: "preserve-3d",
-                }}
-                className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden cursor-pointer"
-                whileHover={{ scale: 1.05, z: 50 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="relative w-full aspect-[2/3] rounded-3xl overflow-hidden cursor-pointer bg-bg-tertiary ott-card-shadow"
             >
-                {/* Image */}
-                <img
-                    src={movie.thumbnail_url}
-                    alt={movie.title}
-                    className="w-full h-full object-cover"
-                />
-
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60" />
-
-                {/* Glow Effect on Hover */}
+                {/* Media Layer */}
                 <motion.div
-                    className="absolute -inset-1 bg-gradient-accent opacity-0 blur-xl -z-10"
-                    animate={{ opacity: isHovered ? 0.4 : 0 }}
-                    transition={{ duration: 0.3 }}
-                />
+                    className="absolute inset-0 z-0"
+                    whileHover={{ scale: 1.15 }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <img
+                        src={movie.thumbnail_url}
+                        alt={movie.title}
+                        className="w-full h-full object-cover brightness-90 group-hover:brightness-75 transition-all duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-transparent to-black/20" />
+                </motion.div>
 
-                {/* Content Overlay */}
-                <div className="absolute inset-0 p-4 flex flex-col justify-end">
-                    {/* Title - Always Visible */}
-                    <motion.h3
-                        className="text-white font-bold text-lg mb-2 line-clamp-2"
-                        style={{ transform: "translateZ(20px)" }}
-                    >
-                        {movie.title}
-                    </motion.h3>
-
-                    {/* Metadata - Always Visible */}
-                    <div className="flex items-center space-x-2 text-xs text-gray-300 mb-3">
-                        {movie.match_percentage && (
-                            <span className="text-green-400 font-semibold">{movie.match_percentage}% Match</span>
+                {/* Overlays & Content */}
+                <div className="absolute inset-0 z-10 p-5 flex flex-col justify-end">
+                    {/* Premiere Tag */}
+                    <div className="absolute top-4 left-4 flex space-x-2 translate-z-20">
+                        {index < 3 && (
+                            <div className="px-2 py-1 rounded bg-accent-primary text-[8px] font-black uppercase tracking-widest text-white shadow-lg">
+                                TOP 10
+                            </div>
                         )}
-                        {movie.age_rating && (
-                            <span className="px-1.5 py-0.5 border border-gray-500 rounded text-[10px]">
-                                {movie.age_rating}
-                            </span>
-                        )}
-                        {movie.release_year && (
-                            <span>{movie.release_year}</span>
-                        )}
+                        <div className="px-2 py-1 rounded glass-panel text-[8px] font-black uppercase tracking-widest text-white">
+                            4K
+                        </div>
                     </div>
 
-                    {/* Hover Actions */}
+                    {/* Metadata Detail */}
                     <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
-                        transition={{ duration: 0.2 }}
-                        className="space-y-3"
-                        style={{ transform: "translateZ(30px)" }}
+                        className="translate-z-50"
+                        animate={{ y: isHovered ? -10 : 0 }}
                     >
-                        {/* Action Buttons */}
-                        <div className="flex items-center space-x-2">
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => navigate(`/watch/${movie.id}`)}
-                                className="flex items-center space-x-1 px-4 py-2 bg-white text-black rounded-full font-semibold text-sm hover:bg-gray-200 transition-colors"
-                            >
-                                <Play className="w-4 h-4 fill-black" />
-                                <span>Play</span>
-                            </motion.button>
-
-                            <motion.button
-                                whileHover={{ scale: 1.1, rotate: 90 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="w-9 h-9 rounded-full glass flex items-center justify-center hover:bg-white/20 transition-colors"
-                            >
-                                <Plus className="w-5 h-5 text-white" />
-                            </motion.button>
-
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => navigate(`/details/${movie.id}`)}
-                                className="w-9 h-9 rounded-full glass flex items-center justify-center hover:bg-white/20 transition-colors"
-                            >
-                                <Info className="w-5 h-5 text-white" />
-                            </motion.button>
+                        <h3 className="text-white font-display font-black text-xl mb-1 truncate leading-tight">
+                            {movie.title}
+                        </h3>
+                        <div className="flex items-center space-x-2 text-[10px] font-bold text-gray-400 mb-4 uppercase tracking-tighter">
+                            <span className="text-accent-primary">98% Match</span>
+                            <span className="w-1 h-1 rounded-full bg-gray-600" />
+                            <span>{movie.release_year}</span>
+                            <span className="w-1 h-1 rounded-full bg-gray-600" />
+                            <span>{movie.age_rating || '18+'}</span>
                         </div>
-
-                        {/* Genres */}
-                        {movie.genre && (
-                            <div className="flex flex-wrap gap-1">
-                                {movie.genre.slice(0, 3).map((g, i) => (
-                                    <span
-                                        key={i}
-                                        className="px-2 py-1 text-[10px] glass-subtle rounded-full text-gray-300"
-                                    >
-                                        {g}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Rating */}
-                        {movie.rating && (
-                            <div className="flex items-center space-x-1">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span className="text-sm font-semibold text-white">{movie.rating}</span>
-                            </div>
-                        )}
                     </motion.div>
+
+                    {/* Expandable Actions */}
+                    <AnimatePresence>
+                        {isHovered && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="flex flex-col space-y-4 translate-z-40 overflow-hidden"
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <button
+                                        onClick={() => navigate(`/watch/${movie.id}`)}
+                                        className="flex-1 flex items-center justify-center space-x-2 py-2.5 bg-white text-black rounded-full font-black text-[10px] uppercase tracking-wider hover:bg-accent-primary hover:text-white transition-all duration-300"
+                                    >
+                                        <Play className="w-3.5 h-3.5 fill-current" />
+                                        <span>Play now</span>
+                                    </button>
+                                    <button className="w-10 h-10 rounded-full glass-panel flex items-center justify-center border border-white/10 hover:border-accent-primary transition-colors">
+                                        <Plus className="w-4 h-4 text-white" />
+                                    </button>
+                                </div>
+
+                                <button
+                                    onClick={() => navigate(`/title/${movie.id}`)}
+                                    className="flex items-center justify-between px-4 py-2 rounded-2xl glass-panel group/btn"
+                                >
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">View Details</span>
+                                    <ChevronRight className="w-4 h-4 text-gray-500 group-hover/btn:text-white transition-colors" />
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
-                {/* Shimmer Effect on Load */}
+                {/* Border Glow Effect */}
                 <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                    initial={{ x: "-100%" }}
-                    animate={{ x: "100%" }}
-                    transition={{ duration: 1.5, delay: index * 0.1 }}
+                    className="absolute inset-0 pointer-events-none border-2 border-accent-primary/0 rounded-3xl"
+                    animate={{ borderColor: isHovered ? 'rgba(255, 106, 0, 0.4)' : 'rgba(255, 106, 0, 0)' }}
                 />
             </motion.div>
         </motion.div>

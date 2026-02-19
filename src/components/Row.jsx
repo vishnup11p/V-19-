@@ -1,120 +1,122 @@
 import { useRef, useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import MovieCard from './MovieCard';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Row = ({ title, subtitle, movies = [], type = 'standard' }) => {
     const rowRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startX, setStartX] = useState(0);
-    const [scrollLeft, setScrollLeft] = useState(0);
+    const [showLeftArrow, setShowLeftArrow] = useState(false);
+    const [showRightArrow, setShowRightArrow] = useState(true);
+
+    const handleScroll = () => {
+        if (rowRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = rowRef.current;
+            setShowLeftArrow(scrollLeft > 10);
+            setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+        }
+    };
 
     const scroll = (direction) => {
         if (rowRef.current) {
             const { current } = rowRef;
-            const scrollAmount = direction === 'left'
-                ? -current.offsetWidth * 0.8
-                : current.offsetWidth * 0.8;
+            const scrollAmount = direction === 'left' ? -current.offsetWidth * 0.8 : current.offsetWidth * 0.8;
             current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         }
     };
 
-    const handleMouseDown = (e) => {
-        setIsDragging(true);
-        setStartX(e.pageX - rowRef.current.offsetLeft);
-        setScrollLeft(rowRef.current.scrollLeft);
-    };
-
-    const handleMouseLeave = () => {
-        setIsDragging(false);
-    };
-
-    const handleMouseUp = () => {
-        setIsDragging(false);
-    };
-
-    const handleMouseMove = (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - rowRef.current.offsetLeft;
-        const walk = (x - startX) * 2;
-        rowRef.current.scrollLeft = scrollLeft - walk;
-    };
+    useEffect(() => {
+        const row = rowRef.current;
+        if (row) {
+            row.addEventListener('scroll', handleScroll);
+            handleScroll(); // Initial check
+            return () => row.removeEventListener('scroll', handleScroll);
+        }
+    }, [movies]);
 
     if (!movies || movies.length === 0) return null;
 
     return (
-        <div className="mb-12 group/row relative z-10">
-            {/* Header */}
-            <div className="px-4 md:px-12 mb-4">
-                <motion.h2
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="text-white text-xl md:text-2xl font-display font-black hover:text-accent transition duration-300 cursor-pointer inline-flex items-center gap-2 group/title"
-                >
-                    {title}
-                    <ChevronRight className="w-5 h-5 opacity-0 group-hover/row:opacity-100 transition-all text-accent transform group-hover/row:translate-x-1" />
-                </motion.h2>
-
-                {subtitle && (
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
+        <section className="mb-16 group/row relative overflow-visible">
+            {/* Header with Premium Flair */}
+            <div className="px-6 md:px-12 lg:px-20 mb-6 flex items-end justify-between">
+                <div>
+                    <div className="flex items-center space-x-2 mb-1">
+                        {type === 'trending' && <Sparkles className="w-4 h-4 text-accent-primary" />}
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-primary/60">
+                            {subtitle || 'Handpicked for you'}
+                        </span>
+                    </div>
+                    <motion.h2
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest"
+                        className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-white leading-none tracking-tight"
                     >
-                        {subtitle}
-                    </motion.p>
-                )}
-            </div>
-
-            {/* Carousel Container */}
-            <div className="group relative">
-                {/* Left Control */}
-                <div className="absolute top-0 bottom-0 left-0 z-40 w-[4%] bg-gradient-to-r from-bg-primary via-bg-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
-                    <button
-                        className="p-3 rounded-full glass hover:bg-white/10 transition-all transform hover:scale-110 active:scale-95"
-                        onClick={() => scroll('left')}
-                        aria-label="Scroll left"
-                    >
-                        <ChevronLeft className="h-6 w-6 text-white" />
-                    </button>
+                        {title}
+                    </motion.h2>
                 </div>
 
-                {/* Scroll Area */}
+                <button className="hidden md:flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors group/more">
+                    <span>View all</span>
+                    <ChevronRight className="w-4 h-4 group-hover/more:translate-x-1 transition-transform" />
+                </button>
+            </div>
+
+            {/* Carousel System */}
+            <div className="relative group px-0 md:px-4 lg:px-8">
+                {/* Left Shadow & Button */}
+                <AnimatePresence>
+                    {showLeftArrow && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-y-0 left-0 z-30 w-24 bg-gradient-to-r from-bg-primary to-transparent pointer-events-none flex items-center justify-start pl-8"
+                        >
+                            <button
+                                onClick={() => scroll('left')}
+                                className="w-12 h-12 rounded-full glass-panel border border-white/10 hover:border-accent-primary flex items-center justify-center pointer-events-auto transition-all hover:scale-110 active:scale-90"
+                            >
+                                <ChevronLeft className="w-6 h-6 text-white" />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Right Shadow & Button */}
+                <AnimatePresence>
+                    {showRightArrow && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-y-0 right-0 z-30 w-24 bg-gradient-to-l from-bg-primary to-transparent pointer-events-none flex items-center justify-end pr-8"
+                        >
+                            <button
+                                onClick={() => scroll('right')}
+                                className="w-12 h-12 rounded-full glass-panel border border-white/10 hover:border-accent-primary flex items-center justify-center pointer-events-auto transition-all hover:scale-110 active:scale-90"
+                            >
+                                <ChevronRight className="w-6 h-6 text-white" />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Scrolling Row */}
                 <div
                     ref={rowRef}
-                    onMouseDown={handleMouseDown}
-                    onMouseLeave={handleMouseLeave}
-                    onMouseUp={handleMouseUp}
-                    onMouseMove={handleMouseMove}
-                    className={`flex gap-5 overflow-x-auto scrollbar-hide px-4 md:px-12 pb-10 pt-4 scroll-smooth ${isDragging ? 'cursor-grabbing select-none' : 'cursor-default'}`}
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    className="flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto no-scrollbar px-6 md:px-12 lg:px-12 py-4 scroll-smooth"
                 >
                     {movies.map((movie, index) => (
-                        <div key={`${movie.id}-${index}`} className="flex-shrink-0 w-44 md:w-56 lg:w-64">
+                        <div key={`${movie.id}-${index}`} className="flex-shrink-0 w-[160px] md:w-[220px] lg:w-[280px]">
                             <MovieCard movie={movie} index={index} />
                         </div>
                     ))}
-
-                    {/* Padding for end of list */}
-                    <div className="w-12 flex-shrink-0" />
-                </div>
-
-                {/* Right Control */}
-                <div className="absolute top-0 bottom-0 right-0 z-40 w-[4%] bg-gradient-to-l from-bg-primary via-bg-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
-                    <button
-                        className="p-3 rounded-full glass hover:bg-white/10 transition-all transform hover:scale-110 active:scale-95"
-                        onClick={() => scroll('right')}
-                        aria-label="Scroll right"
-                    >
-                        <ChevronRight className="h-6 w-6 text-white" />
-                    </button>
+                    {/* Spacer */}
+                    <div className="flex-shrink-0 w-12 md:w-24 lg:w-32 h-1" />
                 </div>
             </div>
-        </div>
+        </section>
     );
 };
 

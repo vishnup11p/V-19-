@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Play, Info, Star, ChevronDown } from 'lucide-react';
+import { Play, Info, Star, Plus, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const HeroBanner = ({ movie }) => {
@@ -8,137 +8,133 @@ const HeroBanner = ({ movie }) => {
     const heroRef = useRef(null);
     const { scrollY } = useScroll();
 
-    // Parallax effects
-    const y1 = useTransform(scrollY, [0, 500], [0, 200]);
-    const opacity = useTransform(scrollY, [0, 400], [1, 0]);
-    const scale = useTransform(scrollY, [0, 400], [1, 1.1]);
+    // Enhanced Parallax & Scale
+    const yBg = useTransform(scrollY, [0, 800], [0, 250]);
+    const opacityBg = useTransform(scrollY, [0, 600], [1, 0.4]);
+    const scaleBg = useTransform(scrollY, [0, 800], [1, 1.2]);
+    const textOpacity = useTransform(scrollY, [0, 400], [1, 0]);
+    const textY = useTransform(scrollY, [0, 400], [0, 50]);
 
     if (!movie) return null;
 
     return (
-        <div ref={heroRef} className="relative h-[100vh] w-full overflow-hidden bg-primary-900">
-            {/* Background with Parallax */}
+        <section ref={heroRef} className="relative h-[95vh] w-full overflow-hidden bg-bg-primary">
+            {/* Immersive Background */}
             <motion.div
-                style={{ y: y1, opacity, scale }}
-                className="absolute inset-0"
+                style={{ y: yBg, opacity: opacityBg, scale: scaleBg }}
+                className="absolute inset-0 z-0"
             >
+                <div className="absolute inset-0 bg-black/30 z-10" />
                 <img
                     src={movie.thumbnail_url}
                     alt={movie.title}
-                    className="w-full h-full object-cover filter brightness-[0.7] saturate-[1.2]"
+                    className="w-full h-full object-cover filter brightness-[0.8] contrast-[1.1]"
                 />
 
-                {/* Advanced Multi-layered Gradients */}
-                <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-transparent to-black/30" />
-                <div className="absolute inset-0 bg-gradient-to-r from-bg-primary via-bg-primary/40 to-transparent" />
-
-                {/* Accent Glow Overlay */}
-                <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-radial from-accent-glow to-transparent opacity-30" />
+                {/* Dynamic Overlays */}
+                <div className="absolute inset-0 hero-gradient-overlay z-20" />
+                <div className="absolute inset-y-0 left-0 w-1/2 hero-side-overlay z-20" />
             </motion.div>
 
-            {/* Content Container */}
-            <div className="absolute inset-0 flex flex-col justify-end pb-24 md:pb-32 px-4 md:px-12 lg:px-20 max-w-7xl mx-auto z-10 pointer-events-none">
-                <div className="space-y-6 pointer-events-auto">
-                    {/* Metadata Badges */}
+            {/* Cinematic Content */}
+            <div className="relative h-full container mx-auto px-6 md:px-12 lg:px-20 z-30 flex flex-col justify-end pb-24 lg:pb-32">
+                <motion.div
+                    style={{ opacity: textOpacity, y: textY }}
+                    className="max-w-3xl"
+                >
+                    {/* Premiere Badge */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="flex flex-wrap items-center gap-3"
+                        className="flex items-center space-x-3 mb-6"
                     >
-                        <span className="glass-subtle px-3 py-1 rounded-full text-xs font-bold text-accent tracking-tighter uppercase">
-                            Premium Choice
+                        <span className="px-4 py-1.5 rounded-full bg-accent-primary/20 border border-accent-primary/30 text-accent-primary text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-accent-primary/10">
+                            Now Streaming
                         </span>
-                        <div className="flex items-center gap-1.5 glass-subtle px-3 py-1 rounded-full">
-                            <Star className="w-3 h-3 fill-accent text-accent" />
-                            <span className="text-xs font-bold">9.8/10</span>
+                        <div className="flex items-center space-x-2 text-white/60 text-xs font-bold">
+                            <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+                            <span>4.9 Rating</span>
                         </div>
-                        <span className="text-gray-400 text-xs font-medium">
-                            {movie.release_year} • {movie.duration}m • {movie.age_rating || '16+'}
-                        </span>
                     </motion.div>
 
-                    {/* Title with Gradient and Glow */}
-                    <motion.div
+                    {/* Movie Title */}
+                    <motion.h1
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-6xl md:text-8xl lg:text-9xl font-display font-black tracking-tight text-white mb-6 leading-[0.9]"
                     >
-                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-display tracking-tight leading-none drop-shadow-2xl">
-                            {movie.title.split(' ').map((word, i) => (
-                                <span key={i} className={i === movie.title.split(' ').length - 1 ? "gradient-text" : "text-white"}>
-                                    {word}{' '}
-                                </span>
-                            ))}
-                        </h1>
+                        {movie.title.split(' ').map((word, i) => (
+                            <span key={i} className={i % 2 !== 0 ? 'inline-block' : 'inline-block gradient-text'}>
+                                {word}{' '}
+                            </span>
+                        ))}
+                    </motion.h1>
+
+                    {/* Meta Info */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        className="flex items-center space-x-4 mb-8 text-sm font-bold text-gray-400"
+                    >
+                        <span>{movie.release_year}</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-600" />
+                        <span className="px-2 py-0.5 rounded border border-gray-700">{movie.age_rating || '18+'}</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-600" />
+                        <span>{movie.duration}m</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-600" />
+                        <span className="text-gray-300">4K Ultra HD</span>
                     </motion.div>
 
-                    {/* Description with Balance */}
+                    {/* Description */}
                     <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        className="max-w-xl text-lg md:text-xl text-gray-300 font-light leading-relaxed line-clamp-3 text-balance drop-shadow-lg"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="text-lg md:text-xl text-gray-300/90 leading-relaxed mb-10 max-w-2xl line-clamp-3 font-medium"
                     >
                         {movie.description}
                     </motion.p>
 
-                    {/* Genres */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.6, delay: 0.6 }}
-                        className="flex flex-wrap gap-2"
-                    >
-                        {movie.genre?.map((g, i) => (
-                            <span key={i} className="text-xs font-medium text-gray-400 flex items-center">
-                                {i > 0 && <span className="w-1 h-1 bg-gray-600 rounded-full mx-2" />}
-                                {g}
-                            </span>
-                        ))}
-                    </motion.div>
-
-                    {/* CTA Buttons */}
+                    {/* Action Buttons */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.8 }}
-                        className="flex flex-wrap items-center gap-4 pt-4"
+                        transition={{ delay: 0.6 }}
+                        className="flex flex-wrap items-center gap-5"
                     >
                         <button
                             onClick={() => navigate(`/watch/${movie.id}`)}
-                            className="btn-primary flex items-center gap-3 px-8 py-4 text-lg animate-pulse-glow"
+                            className="btn-premium group flex items-center space-x-4 py-4 px-10"
                         >
-                            <Play className="fill-white w-6 h-6" />
-                            <span>Watch Preview</span>
+                            <Play className="w-6 h-6 fill-white" />
+                            <span className="text-sm font-black tracking-widest">Start Watching</span>
+                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                         </button>
 
-                        <button className="btn-glass flex items-center gap-3 px-8 py-4 text-lg hover:scale-105 transition-transform">
+                        <button
+                            onClick={() => navigate(`/title/${movie.id}`)}
+                            className="btn-secondary flex items-center space-x-4 py-4 px-10 border border-white/20"
+                        >
                             <Info className="w-6 h-6" />
-                            <span>Explore More</span>
+                            <span className="text-sm font-black tracking-widest">More Info</span>
                         </button>
 
                         <motion.button
-                            whileHover={{ scale: 1.1 }}
+                            whileHover={{ scale: 1.1, rotate: 90 }}
                             whileTap={{ scale: 0.9 }}
-                            className="w-14 h-14 glass-subtle rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                            className="w-14 h-14 rounded-full glass-panel flex items-center justify-center border border-white/10 hover:border-accent-primary transition-colors"
                         >
-                            <Plus className="w-7 h-7" />
+                            <Plus className="w-6 h-6 text-white" />
                         </motion.button>
                     </motion.div>
-                </div>
+                </motion.div>
             </div>
 
-            {/* Scroll Indicator */}
-            <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-400"
-            >
-                <span className="text-[10px] font-bold tracking-widest uppercase opacity-50">Scroll</span>
-                <ChevronDown className="w-4 h-4" />
-            </motion.div>
-        </div>
+            {/* Bottom Glow */}
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent z-40" />
+        </section>
     );
 };
 

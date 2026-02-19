@@ -38,51 +38,54 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-primary-900 relative overflow-hidden p-4">
-            {/* Background Atmosphere */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-accent/10 blur-[100px] rounded-full" />
+        <div className="min-h-screen flex items-center justify-center bg-bg-primary relative overflow-hidden p-6 selection:bg-accent-primary selection:text-white">
+            {/* Cinematic Background Atmosphere */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-bg-primary/80 z-10 backdrop-blur-3xl" />
+                <div className="absolute top-[-10%] right-[-10%] w-[120%] h-[120%] rotate-12 opacity-30 pointer-events-none">
+                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent-primary/20 blur-[180px] rounded-full" />
+                    <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#6366f1]/10 blur-[150px] rounded-full" />
+                </div>
             </div>
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                className="relative z-10 w-full max-w-lg"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="relative z-10 w-full max-w-xl"
             >
-                <div className="glass-strong rounded-[3rem] p-10 md:p-14 shadow-2xl border-2 border-white/5 relative overflow-hidden group">
-                    {/* Interior Glow */}
-                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="glass-panel p-10 md:p-16 rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">
+                    {/* Background Texture */}
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
 
-                    <div className="relative z-10 text-center mb-12">
+                    <div className="relative z-10 text-center mb-16">
                         <motion.div
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-8"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-accent-primary/10 border border-accent-primary/30 mb-8"
                         >
-                            <Sparkles className="w-4 h-4 text-accent" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Next Gen Streaming</span>
+                            <Sparkles className="w-3.5 h-3.5 text-accent-primary" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-primary">The Future of Content</span>
                         </motion.div>
 
-                        <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter text-white mb-4 drop-shadow-glow">
-                            V 19<span className="gradient-text">+</span> Vision
+                        <h1 className="text-5xl md:text-6xl font-display font-black tracking-tighter text-white mb-6 leading-none">
+                            V 19<span className="gradient-text">+</span>
                         </h1>
-                        <p className="text-gray-500 font-medium leading-relaxed">
-                            Sign in to explore the most cinematic collection of movies and series in the universe.
+                        <p className="text-gray-400 font-medium text-lg max-w-sm mx-auto leading-relaxed">
+                            Welcome back. Secure your access to the next generation of digital masterpieces.
                         </p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-6">
-                        <div className="relative group/input">
-                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within/input:text-accent transition-colors">
+                        <div className="group relative">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-accent-primary transition-colors">
                                 <Mail className="w-5 h-5" />
                             </div>
                             <input
                                 type="email"
-                                placeholder="Universal Identity (Email)"
-                                className="w-full glass-subtle border-2 border-white/5 rounded-2xl pl-14 pr-6 py-5 text-white placeholder-gray-600 focus:outline-none focus:border-accent focus:bg-white/5 transition-all outline-none"
+                                placeholder="Universal Access ID"
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-white placeholder-gray-600 focus:outline-none focus:border-accent-primary focus:bg-white/10 transition-all text-lg"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -92,36 +95,31 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full gradient-accent hover:shadow-glow-strong text-white font-black tracking-widest uppercase text-xs py-5 rounded-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+                            className="w-full btn-premium py-5 rounded-2xl flex items-center justify-center space-x-3 group/btn shadow-[0_20px_40px_-15px_rgba(255,106,0,0.4)]"
                         >
                             {loading ? (
-                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
-                                    💥
-                                </motion.div>
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
                             ) : (
                                 <>
-                                    <span>Enter the Vision</span>
-                                    <ArrowRight className="w-4 h-4" />
+                                    <span className="font-black uppercase tracking-widest text-xs">Unlock Exclusive Access</span>
+                                    <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                                 </>
                             )}
                         </button>
                     </form>
 
-                    <div className="relative my-10">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-white/5" />
-                        </div>
-                        <div className="relative flex justify-center">
-                            <span className="px-4 text-[10px] font-black tracking-widest uppercase text-gray-600 bg-transparent backdrop-blur-3xl">Collaborative Login</span>
-                        </div>
+                    <div className="relative my-12 flex items-center">
+                        <div className="flex-1 h-px bg-white/5" />
+                        <span className="px-6 text-[10px] font-black uppercase tracking-[0.4em] text-gray-600">Secure Federation</span>
+                        <div className="flex-1 h-px bg-white/5" />
                     </div>
 
                     <button
                         onClick={handleGoogleLogin}
-                        className="w-full glass-subtle hover:bg-white/5 text-gray-300 font-black tracking-widest uppercase text-[10px] py-5 rounded-2xl flex items-center justify-center gap-3 transition-all border border-white/5 hover:border-white/10"
+                        className="w-full flex items-center justify-center space-x-4 py-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group/google"
                     >
-                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
-                        Sync with Google
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                        <span className="font-black uppercase tracking-widest text-[10px] text-white">Identity with Google</span>
                     </button>
 
                     <AnimatePresence>
@@ -130,7 +128,7 @@ const Login = () => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0 }}
-                                className="mt-8 p-4 glass-subtle border border-accent/30 rounded-2xl text-center text-xs font-bold text-accent shadow-glow"
+                                className="mt-8 p-5 rounded-2xl bg-accent-primary/10 border border-accent-primary/20 text-center text-xs font-bold text-accent-primary shadow-[0_0_30px_rgba(255,106,0,0.1)]"
                             >
                                 {message}
                             </motion.div>
@@ -138,9 +136,12 @@ const Login = () => {
                     </AnimatePresence>
                 </div>
 
-                <div className="mt-10 flex items-center justify-center gap-2 opacity-30">
-                    <ShieldCheck className="w-4 h-4 text-gray-500" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Encrypted Vision Access</span>
+                <div className="mt-12 flex flex-col items-center space-y-4 opacity-30">
+                    <div className="flex items-center space-x-3">
+                        <ShieldCheck className="w-4 h-4 text-gray-400" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Quantum Encrypted Access</span>
+                    </div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Powered by V 19+ Core</p>
                 </div>
             </motion.div>
         </div>

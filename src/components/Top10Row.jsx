@@ -1,135 +1,132 @@
 import { useNavigate } from 'react-router-dom';
-import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRef } from 'react';
-import { motion } from 'framer-motion';
-
-const Top10Badge = ({ rank }) => {
-    return (
-        <div className="absolute top-0 left-0 w-24 h-full flex items-end justify-center pb-2 z-10 pointer-events-none transform -translate-x-4 scale-125">
-            <svg viewBox="0 0 100 150" className="w-full h-full drop-shadow-lg">
-                <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#555" />
-                        <stop offset="100%" stopColor="#222" />
-                    </linearGradient>
-                </defs>
-                <text
-                    x="50"
-                    y="130"
-                    fontSize="130"
-                    fontWeight="900"
-                    fill="none"
-                    stroke="#888"
-                    strokeWidth="2"
-                    textAnchor="middle"
-                    fontFamily="Inter, sans-serif"
-                    className="drop-shadow-md"
-                >
-                    {rank}
-                </text>
-                <text
-                    x="50"
-                    y="130"
-                    fontSize="130"
-                    fontWeight="900"
-                    fill="url(#gradient)"
-                    textAnchor="middle"
-                    fontFamily="Inter, sans-serif"
-                >
-                    {rank}
-                </text>
-            </svg>
-        </div>
-    );
-};
+import { Play, ChevronLeft, ChevronRight, TrendingUp } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Top10Row = ({ movies }) => {
     const navigate = useNavigate();
     const rowRef = useRef(null);
+    const [showLeftArrow, setShowLeftArrow] = useState(false);
+    const [showRightArrow, setShowRightArrow] = useState(true);
 
-    if (!movies || movies.length === 0) return null;
+    const handleScroll = () => {
+        if (rowRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = rowRef.current;
+            setShowLeftArrow(scrollLeft > 10);
+            setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+        }
+    };
 
     const scroll = (direction) => {
         if (rowRef.current) {
             const { current } = rowRef;
-            const scrollAmount = direction === 'left'
-                ? -current.offsetWidth * 0.8
-                : current.offsetWidth * 0.8;
+            const scrollAmount = direction === 'left' ? -current.offsetWidth * 0.8 : current.offsetWidth * 0.8;
             current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         }
     };
 
+    useEffect(() => {
+        const row = rowRef.current;
+        if (row) {
+            row.addEventListener('scroll', handleScroll);
+            handleScroll();
+            return () => row.removeEventListener('scroll', handleScroll);
+        }
+    }, [movies]);
+
+    if (!movies || movies.length === 0) return null;
+
     return (
-        <div className="mb-12 group/row relative z-10">
-            <div className="px-4 md:px-12 mb-4">
-                <h2 className="text-white text-xl md:text-2xl font-bold font-display inline-flex items-center gap-2">
-                    <span className="text-2xl">🔥</span> Top 10 in Your Country
+        <section className="mb-20 group/row relative">
+            {/* Premium Header */}
+            <div className="px-6 md:px-12 lg:px-20 mb-8">
+                <div className="flex items-center space-x-2 mb-1">
+                    <TrendingUp className="w-4 h-4 text-accent-primary" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-primary/60">Most Popular Today</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-white leading-none tracking-tight">
+                    Top 10 in Your Country
                 </h2>
             </div>
 
-            <div className="group relative">
-                {/* Scroll Controls */}
-                <div className="absolute top-0 bottom-0 left-0 z-40 w-[4%] bg-gradient-to-r from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
-                    <button
-                        className="p-2 rounded-full glass hover:bg-white/20 transition-all transform hover:scale-110 active:scale-95"
-                        onClick={() => scroll('left')}
-                    >
-                        <ChevronLeft className="h-6 w-6 text-white" />
-                    </button>
-                </div>
+            {/* Scroll Container */}
+            <div className="relative group px-0 md:px-4 lg:px-8">
+                <AnimatePresence>
+                    {showLeftArrow && (
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute inset-y-0 left-0 z-30 w-32 bg-gradient-to-r from-bg-primary to-transparent pointer-events-none flex items-center justify-start pl-8"
+                        >
+                            <button onClick={() => scroll('left')} className="w-12 h-12 rounded-full glass-panel border border-white/10 hover:border-accent-primary flex items-center justify-center pointer-events-auto transition-all hover:scale-110 active:scale-90">
+                                <ChevronLeft className="w-6 h-6 text-white" />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                    {showRightArrow && (
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute inset-y-0 right-0 z-30 w-32 bg-gradient-to-l from-bg-primary to-transparent pointer-events-none flex items-center justify-end pr-8"
+                        >
+                            <button onClick={() => scroll('right')} className="w-12 h-12 rounded-full glass-panel border border-white/10 hover:border-accent-primary flex items-center justify-center pointer-events-auto transition-all hover:scale-110 active:scale-90">
+                                <ChevronRight className="w-6 h-6 text-white" />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <div
                     ref={rowRef}
-                    className="flex gap-8 overflow-x-auto scrollbar-hide px-4 md:px-12 pb-8 pt-4 scroll-smooth"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    className="flex gap-12 md:gap-20 overflow-x-auto no-scrollbar px-6 md:px-12 lg:px-12 py-10 scroll-smooth"
                 >
-                    {movies.map((movie, index) => (
-                        <div key={movie.id} className="relative flex-shrink-0 w-48 md:w-64">
-                            <motion.div
-                                className="flex relative"
-                                whileHover={{ scale: 1.05, zIndex: 20 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    {movies.slice(0, 10).map((movie, index) => (
+                        <motion.div
+                            key={movie.id}
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 }}
+                            className="relative flex-shrink-0 flex items-end group/card"
+                        >
+                            {/* Rank Stylized Number */}
+                            <div className="text-[14rem] md:text-[20rem] font-display font-black leading-none select-none pointer-events-none
+                                text-transparent -mb-8 -ml-4 md:-ml-8 z-0 transition-all duration-700
+                                group-hover/card:scale-110 group-hover/card:text-accent-primary/20"
+                                style={{
+                                    WebkitTextStroke: '2px rgba(255,255,255,0.15)',
+                                    textShadow: '0 0 40px rgba(0,0,0,0.5)'
+                                }}
                             >
-                                {/* Rank Number */}
-                                <div className="flex-shrink-0 w-16 md:w-24 text-8xl md:text-[10rem] font-black text-stroke text-right leading-none self-end text-zinc-800"
-                                    style={{
-                                        WebkitTextStroke: '2px #666',
-                                        textShadow: '0 0 20px rgba(0,0,0,0.5)'
-                                    }}
-                                >
-                                    {index + 1}
-                                </div>
+                                {index + 1}
+                            </div>
 
-                                {/* Movie Card */}
-                                <div
-                                    className="relative aspect-[2/3] w-32 md:w-40 rounded-lg overflow-hidden cursor-pointer shadow-xl -ml-4"
-                                    onClick={() => navigate(`/details/${movie.id}`)}
-                                >
-                                    <img
-                                        src={movie.thumbnail_url}
-                                        alt={movie.title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <Play className="w-10 h-10 text-white fill-white drop-shadow-lg" />
+                            {/* Cinema Card */}
+                            <motion.div
+                                whileHover={{ y: -20, scale: 1.05 }}
+                                className="relative w-40 md:w-56 lg:w-64 aspect-[2/3] rounded-[2rem] overflow-hidden ott-card-shadow border border-white/10 z-10 -ml-12 md:-ml-16 cursor-pointer"
+                                onClick={() => navigate(`/details/${movie.id}`)}
+                            >
+                                <img
+                                    src={movie.thumbnail_url}
+                                    alt={movie.title}
+                                    className="w-full h-full object-cover grayscale-[0.2] group-hover/card:grayscale-0 transition-all duration-700"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover/card:opacity-30 transition-opacity" />
+
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all scale-90 group-hover/card:scale-100">
+                                    <div className="w-16 h-16 rounded-full bg-accent-primary flex items-center justify-center shadow-2xl">
+                                        <Play className="w-6 h-6 fill-white ml-1" />
                                     </div>
                                 </div>
                             </motion.div>
-                        </div>
+                        </motion.div>
                     ))}
-                    <div className="w-8 flex-shrink-0" />
-                </div>
-
-                <div className="absolute top-0 bottom-0 right-0 z-40 w-[4%] bg-gradient-to-l from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
-                    <button
-                        className="p-2 rounded-full glass hover:bg-white/20 transition-all transform hover:scale-110 active:scale-95"
-                        onClick={() => scroll('right')}
-                    >
-                        <ChevronRight className="h-6 w-6 text-white" />
-                    </button>
+                    <div className="w-24 md:w-40 flex-shrink-0" />
                 </div>
             </div>
-        </div>
+        </section>
     );
 };
 

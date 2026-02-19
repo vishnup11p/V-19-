@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "V 19+ OTT",
+    "slug": "v19-ott",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./public/vite.svg",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./public/vite.svg",
+      "resizeMode": "contain",
+      "backgroundColor": "#050508"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./public/vite.svg",
+        "backgroundColor": "#050508"
+      },
+      "package": "com.v19.ott"
+    },
+    "web": {
+      "favicon": "./public/vite.svg"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e7b2ebd2-8e31-435d-9f84-5f67a1ac67ee"
+      }
+    }
+  }
+}
